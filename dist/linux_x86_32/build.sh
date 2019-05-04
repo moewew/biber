@@ -9,7 +9,7 @@
 # is not searched first, even though it's at the top of LD_LIBRARY_PATH. So, the wrong
 # libraries will be found and things may well break. Strip any RPATH out of such libs
 # with "chrpath -d <lib>". Check for presence with "readelf -d <lib>".
-# 
+#
 # Check all perl binaries with:
 # for file in `find /usr/local/perl/lib* -name \*.so`; do echo $file >> /tmp/out ;readelf -d $file >> /tmp/out; done
 # and then grep the file for "RPATH"
@@ -32,7 +32,7 @@
 # by looking to see if there is a site_perl directory for the module. If there is, we use that
 # version.
 
-declare -r perlv='5.26.0'
+declare -r perlv='5.28.2'
 declare ucpath="/usr/local/perl/lib/${perlv}/Unicode/Collate"
 
 # Unicode::Collate has a site_perl version so has been updated since this
@@ -69,12 +69,13 @@ PAR_VERBATIM=1 /usr/local/perl/bin/pp \
   --module=Text::CSV_XS \
   --module=DateTime \
   --link=/usr/local/perl/lib/libbtparse.so \
-  --link=/usr/local/lib/libxml2.so.2 \
-  --link=/usr/local/lib/libz.so.1 \
-  --link=/usr/local/lib/libxslt.so.1 \
-  --link=/usr/local/lib/libexslt.so.0 \
-  --link=/usr/lib/libssl.so.0.9.8 \
-  --link=/usr/lib/libcrypto.so.0.9.8 \
+  --link=/usr/lib/i386-linux-gnu/liblzma.so \
+  --link=/usr/lib/i386-linux-gnu/libxml2.so \
+  --link=/usr/lib/i386-linux-gnu/libz.so\
+  --link=/usr/lib/i386-linux-gnu/libxslt.so \
+  --link=/usr/lib/i386-linux-gnu/libexslt.so \
+  --link=/usr/lib/i386-linux-gnu/libssl.so \
+  --link=/usr/lib/i386-linux-gnu/libcrypto.so \
   --addfile="../../data/biber-tool.conf;lib/Biber/biber-tool.conf" \
   --addfile="../../data/schemata/config.rnc;lib/Biber/config.rnc" \
   --addfile="../../data/schemata/config.rng;lib/Biber/config.rng" \
