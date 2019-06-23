@@ -33,7 +33,7 @@ use File::Slurper;
 use File::Spec;
 use File::Temp;
 use IO::File;
-use List::AllUtils qw( first uniq max first_index);
+use List::AllUtils qw( first uniq max first_index );
 use Log::Log4perl qw( :no_extra_logdie_message );
 use POSIX qw( locale_h ); # for lc()
 use Scalar::Util qw(looks_like_number);
@@ -1533,7 +1533,7 @@ sub validate_datamodel {
       # * Valid because it's allowed for "ALL" entrytypes OR
       # * Valid field for the specific entrytype OR
       # * Valid because entrytype allows "ALL" fields
-      unless ($et eq 'xdata') { # XDATA are generic containers for any field
+      unless ($et eq 'xdata' or $et eq 'set') { # XDATA/SET are generic containers for any field
         foreach my $ef ($be->datafields) {
           unless ($dm->is_field_for_entrytype($et, $ef)) {
             $dmwe->("Datamodel: Entry '$citekey' ($ds): Invalid field '$ef' for entrytype '$et'", $be);
@@ -4691,6 +4691,9 @@ sub _parse_sort {
       }
       if (defined($sortitem->{pad_side})) { # Found sorting pad side attribute
         $sortitemattributes->{pad_side} = $sortitem->{pad_side};
+      }
+      if (defined($sortitem->{literal})) { # Found literal attribute
+        $sortitemattributes->{literal} = $sortitem->{literal};
       }
       push $sortingitems->@*, {$sortitem->{content} => $sortitemattributes};
     }

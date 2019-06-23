@@ -352,7 +352,7 @@ sub create_entry {
       $smap->{map_overwrite} = $smap->{map_overwrite} // 0; # default
       my $level = $smap->{level};
 
-    MAP: foreach my $map ($smap->{map}->@*) {
+      foreach my $map ($smap->{map}->@*) {
 
         # Skip if this map element specifies a particular refsection and it is not this one
         if (exists($map->{refsection})) {
@@ -402,7 +402,7 @@ sub create_entry {
           }
         }
 
-        foreach my $maploop (@maploop) {
+      MAP: foreach my $maploop (@maploop) {
           my $MAPUNIQVAL;
           # loop over mapping steps
           foreach my $step ($map->{map_step}->@*) {
@@ -803,12 +803,12 @@ sub _create_entry {
 
     # Now run any defined handler
     if ($dm->is_field($f)) {
-      my $handler = _get_handler($f);
-      my $v = $handler->($bibentry, $e, $f, $k);
-
-      # Don't set datafields with empty contents like 'language = {}'
-      if (defined($v) and $e->get($f) ne '') {
-        $bibentry->set_datafield($f, $v);
+      if ($e->get($f) ne '') { # Check the raw field in case we have e.g. date = {}
+        my $handler = _get_handler($f);
+        my $v = $handler->($bibentry, $e, $f, $k);
+        if (defined($v)) {
+          $bibentry->set_datafield($f, $v);
+        }
       }
     }
     elsif (Biber::Config->getoption('validate_datamodel')) {
