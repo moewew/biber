@@ -33,18 +33,18 @@
 # version.
 
 declare -r perlv='5.28.2'
-declare ucpath="/usr/local/perl/lib/${perlv}/Unicode/Collate"
+declare ucpath="/usr/local/perl530/lib/${perlv}/Unicode/Collate"
 
 # Unicode::Collate has a site_perl version so has been updated since this
 # perl was released
-if [ -d "/usr/local/perl/lib/site_perl/${perlv}/i686-linux-thread-multi/Unicode/Collate" ]
+if [ -d "/usr/local/perl530/lib/site_perl/${perlv}/i686-linux-thread-multi/Unicode/Collate" ]
 then
-  ucpath="/usr/local/perl/lib/site_perl/${perlv}/i686-linux-thread-multi/Unicode/Collate"
+  ucpath="/usr/local/perl530/lib/site_perl/${perlv}/i686-linux-thread-multi/Unicode/Collate"
 fi
 
 echo "USING Unicode::Collate at: ${ucpath}"
 
-PAR_VERBATIM=1 /usr/local/perl/bin/pp \
+PAR_VERBATIM=1 /usr/local/perl530/bin/pp \
   --unicode \
   --module=deprecate \
   --module=Biber::Input::file::bibtex \
@@ -93,4 +93,4 @@ PAR_VERBATIM=1 /usr/local/perl/bin/pp \
   --addfile="/usr/local/perl/lib/site_perl/${perlv}/Business/ISBN/RangeMessage.xml;lib/Business/ISBN/RangeMessage.xml" \
   --cachedeps=scancache \
   --output=biber-linux_x86_32 \
-  /usr/local/perl/bin/biber
+  /usr/local/perl530/bin/biber
