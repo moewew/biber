@@ -296,7 +296,12 @@ sub extract_entries {
       next if /overriding\sexisting\sdefinition\sof\smacro/; # ignore macro redefs
       if (/error:/) {
         chomp;
-        biber_error("BibTeX subsystem: $_");
+        if (/skipping\sto\snext\s"\@"/) {
+          biber_error("BibTeX subsystem: $_", 1);
+        }
+        else {
+          biber_error("BibTeX subsystem: $_");
+        }
       }
       elsif (/warning:/) {
         chomp;
@@ -807,7 +812,12 @@ sub _create_entry {
         my $handler = _get_handler($f);
         my $v = $handler->($bibentry, $e, $f, $k);
         if (defined($v)) {
-          $bibentry->set_datafield($f, $v);
+          if ($v eq 'BIBER_SKIP_ENTRY') {# field data is bad enough to cause entry to be skipped
+            return;
+          }
+          else {
+            $bibentry->set_datafield($f, $v);
+          }
         }
       }
     }
@@ -1034,9 +1044,9 @@ sub _name {
 
     # Consecutive "and" causes Text::BibTeX::Name to segfault
     unless ($name) {
-      biber_warn("Name in key '$key' is empty (probably consecutive 'and'): skipping name", $be);
+      biber_warn("Name in key '$key' is empty (probably consecutive 'and'): skipping entry '$key'", $be);
       $section->del_citekey($key);
-      next;
+      return 'BIBER_SKIP_ENTRY';
     }
 
     my $nps = join('|', $dm->get_constant_value('nameparts'));
@@ -1057,12 +1067,16 @@ sub _name {
       unless ($name =~ m/\A\{\X+\}\z/xms) { # Ignore these tests for escaped names
         my @commas = $name =~ m/,/g;
         if ($#commas > 1) {
-          biber_error("Name \"$name\" has too many commas");
+          biber_error("Name \"$name\" has too many commas, skipping entry '$key'", 1);
+          $section->del_citekey($key);
+          return 'BIBER_SKIP_ENTRY';
         }
 
         # Consecutive commas cause Text::BibTeX::Name to segfault
         if ($name =~ /,,/) {
-          biber_error("Name \"$name\" is malformed (consecutive commas): skipping name");
+          biber_error("Name \"$name\" is malformed (consecutive commas): skipping entry '$key'", 1);
+          $section->del_citekey($key);
+          return 'BIBER_SKIP_ENTRY';
         }
       }
 
@@ -1549,6 +1563,13 @@ sub parsename {
   # initials, we do so without certain things. This is easier than trying
   # hack robust initials code into btparse ...
   my $nd_namestr = strip_noinit($namestr);
+
+  # Now re-santise after the arbitrary regexps of the noinit removals
+  # leading and trailing whitespace
+  $nd_namestr =~ s/\A\s*|\s*\z//xms;
+
+  # Collapse internal whitespace
+  $nd_namestr =~ s/\s+|\\\s/ /g;
 
   # Make initials with ties in between work. btparse doesn't understand this so replace with
   # spaces - this is fine as we are just generating initials
