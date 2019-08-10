@@ -32,7 +32,7 @@
 # by looking to see if there is a site_perl directory for the module. If there is, we use that
 # version.
 
-declare -r perlv='5.28.2'
+declare -r perlv='5.30.0'
 declare ucpath="/usr/local/perl530/lib/${perlv}/Unicode/Collate"
 
 # Unicode::Collate has a site_perl version so has been updated since this
@@ -87,10 +87,10 @@ PAR_VERBATIM=1 /usr/local/perl530/bin/pp \
   --addfile="${ucpath}/CJK;lib/Unicode/Collate/CJK" \
   --addfile="${ucpath}/allkeys.txt;lib/Unicode/Collate/allkeys.txt" \
   --addfile="${ucpath}/keys.txt;lib/Unicode/Collate/keys.txt" \
-  --addfile="/usr/local/perl/lib/site_perl/${perlv}/Mozilla/CA/cacert.pem;lib/Mozilla/CA/cacert.pem" \
-  --addfile="/usr/local/perl/lib/${perlv}/i686-linux-thread-multi/PerlIO;lib/PerlIO" \
-  --addfile="/usr/local/perl/lib/${perlv}/i686-linux-thread-multi/auto/PerlIO;lib/auto/PerlIO" \
-  --addfile="/usr/local/perl/lib/site_perl/${perlv}/Business/ISBN/RangeMessage.xml;lib/Business/ISBN/RangeMessage.xml" \
+  --addfile="/usr/local/perl530/lib/site_perl/${perlv}/Mozilla/CA/cacert.pem;lib/Mozilla/CA/cacert.pem" \
+  --addfile="/usr/local/perl530/lib/${perlv}/i686-linux-thread-multi/PerlIO;lib/PerlIO" \
+  --addfile="/usr/local/perl530/lib/${perlv}/i686-linux-thread-multi/auto/PerlIO;lib/auto/PerlIO" \
+  --addfile="/usr/local/perl530/lib/site_perl/${perlv}/Business/ISBN/RangeMessage.xml;lib/Business/ISBN/RangeMessage.xml" \
   --cachedeps=scancache \
   --output=biber-linux_x86_32 \
   /usr/local/perl530/bin/biber
