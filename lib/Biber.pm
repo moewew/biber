@@ -246,7 +246,8 @@ sub tool_mode_setup {
   my $bib_section = new Biber::Section('number' => 99999);
   $bib_section->set_datasources([{type => 'file',
                                   name => $ARGV[0],
-                                  datatype => Biber::Config->getoption('input_format')}]);
+                                  datatype => Biber::Config->getoption('input_format'),
+                                  encoding => Biber::Config->getoption('input_encoding')}]);
   $bib_section->set_allkeys(1);
   $bib_sections->add_section($bib_section);
 
@@ -781,8 +782,9 @@ sub parse_ctrlfile {
   }
   Biber::Config->setblxoption(undef, 'sortingtemplate', $sortingtemplates);
 
-  # DATAMODEL schema (always global)
-  Biber::Config->setblxoption(undef, 'datamodel', $bcfxml->{datamodel});
+  # DATAMODEL schema (always global and is an array to accomodate multiple
+  # datamodels in tool mode)
+  Biber::Config->addtoblxoption(undef, 'datamodel', $bcfxml->{datamodel});
 
   # SECTIONS
   # This is also where we set data files as these are associated with a bib section
@@ -1514,6 +1516,7 @@ sub validate_datamodel {
   my $dm = Biber::Config->get_dm;
 
   if (Biber::Config->getoption('validate_datamodel')) {
+    $logger->info("Datamodel validation starting");
     my $dmwe = Biber::Config->getoption('dieondatamodel') ? \&biber_error : \&biber_warn;
     foreach my $citekey ($section->get_citekeys) {
       my $be = $section->bibentry($citekey);
@@ -1556,6 +1559,7 @@ sub validate_datamodel {
         $dmwe->($warning, $be);
       }
     }
+    $logger->info("Datamodel validation complete");
   }
 }
 
@@ -4383,21 +4387,15 @@ sub fetch_data {
     $section->add_undef_citekey($citekey);
   }
 
-  # Don't need to do dependent detection if running in (real) tool mode since this is always
-  # allkeys=1 and we don't care about missing dependents which get_dependents() might prune.
-  # pseudo_tool mode is bibtex output when not in tool mode. Internally, it's essentially
-  # the same but without allkeys.
-  if (Biber::Config->getoption('tool') and not
-      Biber::Config->getoption('pseudo_tool')) {
-    return;
-  }
-
   if ($logger->is_debug()) {# performance tune
     $logger->debug('Building dependents for keys: ' . join(',', $section->get_citekeys));
   }
 
   # dependent key list generation - has to be a sub as it's recursive to catch
   # nested crossrefs, xdata etc.
+  # We still do this even in tool mode which is implicitly allkeys=1 because it
+  # prunes things like missing crossrefs etc. which otherwise would cause problems
+  # later on
   get_dependents($self, [$section->get_citekeys]);
   if ($logger->is_debug()) {# performance tune
     $logger->debug("Citekeys for section '$secnum' after fetching data: " . join(', ', $section->get_citekeys));
